@@ -22,6 +22,36 @@ renderlets {
 
 With this in place, the renderlet is exposed via HTTP on the endpoint `/__renderlet/some_renderlet`
 
+### Parameters
+
+Renderlets can define parameters that can be specified by the consumer via query arguments:
+
+```neosfusion
+renderlet_with_parameters = Wwwision.Renderlets.Provider:Renderlet {
+    parameters {
+        foo = true
+        bar = false
+    }
+    renderer = afx`foo: {parameters.foo}, bar: {parameters.bar || 'default'}`
+}
+```
+
+In this example, the "foo" parameter is required (`true`) while "bar" is optional.
+If the renderlet endpoint is requested without any query parameters (`/__renderlet/renderlet_with_parameters`) a 400 HTTP response is returned with the body:
+
+```html
+Missing/empty parameter "foo"
+```
+
+If the parameters are specified (e.g. `/__renderlet/renderlet_with_parameters?foo=foo%20value&bar=bar%20value`) they are evaluated as expected:
+
+```html
+foo: foo value, bar: bar value
+```
+
+> [!NOTE]  
+> Query parameters that don't match a configured parameter (e.g. `/__renderlet/renderlet_with_parameters?fo=typo`) also lead to a 400 status code to prevent misbehavior due to typos
+
 ### Caching
 
 Each renderlet is assigned a `cacheId` that will be turned into an [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) HTTP header in the response.
@@ -55,6 +85,9 @@ some_renderlet = Wwwision.Renderlets.Provider:Renderlet {
     renderer = afx`Static content`
 }
 ```
+
+> [!NOTE]  
+> Parameters are always part of the cache entryIdentifier, so that every parameter combination is cached individually
 
 ### HTTP Headers
 
@@ -97,6 +130,42 @@ some_renderlet = Wwwision.Renderlets.Provider:Renderlet {
         'X-Custom-Header' = 'some value'
     }
     // ...
+}
+```
+
+### Localization
+
+Renderlet enddpoints work independantly from the Neos routing. As a result, nodes from the content repository will be loaded in their default dimension.
+But parameters are a good option to allow the consumer to change the language:
+
+```neosfusion
+localized_renderlet = Wwwision.Renderlets.Provider:Renderlet {
+    parameters {
+        lang = true
+    }
+    @context {
+        someNode = ${q(site).children('[instanceof Some.Package:SomeNodeType]').get(0)}
+        someNode.@process.translate = ${q(value).context({dimensions: {language: [parameters.lang]}, targetDimensions: {language: parameters.lang}}).get(0)}
+    }
+    renderer = afx`{q(someNode).property('title')}`
+}
+```
+
+In this case, a `lang` query argument has to be specified that is used to load a node in the respective context.
+
+Alternatively, the parameter could be made optional:
+
+```neosfusion
+localized_renderlet = Wwwision.Renderlets.Provider:Renderlet {
+    parameters {
+        lang = false
+    }
+    @context {
+        someNode = ${q(site).children('[instanceof Some.Package:SomeNodeType]').get(0)}
+        someNode.@process.translate = ${q(value).context({dimensions: {language: [parameters.lang]}, targetDimensions: {language: parameters.lang}}).get(0)}
+        someNode.@process.translate.@if.hasLanguageParameter = ${!String.isBlank(parameters.lang)}
+    }
+    renderer = afx`{q(someNode).property('title')}`
 }
 ```
 

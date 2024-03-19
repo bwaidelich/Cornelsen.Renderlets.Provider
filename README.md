@@ -223,3 +223,11 @@ some_renderlet_props = Wwwision.Renderlets.Provider:RenderletProps {
     }
 }
 ```
+
+## Contribution
+
+Contributions in the form of [issues](https://github.com/bwaidelich/Wwwision.Renderlets.Provider/issues) or [pull requests](https://github.com/bwaidelich/Wwwision.Renderlets.Provider/pulls) are highly appreciated
+
+## License
+
+See [LICENSE](./LICENSE)

@@ -2,6 +2,23 @@
     "description": "Neos package to provide snippets of data/rendered content (aka 'renderlets') to be consumed by Wwwision.Renderlets.Consumer",
     "type": "neos-package",
     "name": "wwwision/renderlets-provider",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "bwaidelich",
+            "email": "b.waidelich@wwwision.de"
+        }
+    ],
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/bwaidelich"
+        },
+        {
+            "type": "paypal",
+            "url": "https://www.paypal.me/bwaidelich"
+        }
+    ],
     "require": {
         "neos/neos": "^7.3 || ^8.0"
     },

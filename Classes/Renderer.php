@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Wwwision\Renderlets\Provider;
 
+use Neos\Fusion\Core\Cache\ContentCache;
 use Wwwision\Renderlets\Provider\Exception\FailedToRenderRenderlet;
 use Wwwision\Renderlets\Provider\Exception\InvalidRenderletId;
 use Wwwision\Renderlets\Provider\Exception\MissingRenderletParameter;
@@ -31,11 +32,13 @@ final class Renderer
 
     private ContextFactoryInterface $contextFactory;
     private FusionService $fusionService;
+    private ContentCache $contentCache;
 
-    public function __construct(ContextFactoryInterface $contextFactory, FusionService $fusionService)
+    public function __construct(ContextFactoryInterface $contextFactory, FusionService $fusionService, ContentCache $contentCache)
     {
         $this->contextFactory = $contextFactory;
         $this->fusionService = $fusionService;
+        $this->contentCache = $contentCache;
     }
 
     /**
@@ -65,6 +68,7 @@ final class Renderer
             } catch (FusionRuntimeException $exception) {
                 throw $exception->getPrevious();
             }
+            $result = $this->contentCache->processCacheSegments($result, false);
             $renderlet = Renderlet::fromJson($result);
         } catch (MissingFusionObjectException $exception) {
             throw new InvalidRenderletId(sprintf('Failed to render fusion path "%s" for node "%s" (exception)', $fusionPath, $siteNode->getIdentifier()), 1637756438, $exception);

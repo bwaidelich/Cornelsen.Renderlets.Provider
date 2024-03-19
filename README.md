@@ -86,6 +86,8 @@ some_renderlet = Wwwision.Renderlets.Provider:Renderlet {
 }
 ```
 
+For [Renderlet Props](#renderlet-props) the cache behavior can be configured via `renderer.@cache`
+
 > [!NOTE]  
 > Parameters are always part of the cache entryIdentifier, so that every parameter combination is cached individually
 
@@ -196,3 +198,28 @@ This will render the following JSON on the endpoint `/__renderlet/some_renderlet
 ```
 
 The `Content-Type` header of `RenderletProps` is `application/json` by default, but it can be changed as described above.
+
+#### Cache segments
+
+When rendering Fusion prototypes with their own `@cache` configuration within renderlets, this can lead to Content Cache markers to appear in the response (see [issue](https://github.com/bwaidelich/Wwwision.Renderlets.Provider/issues/3) for details).
+Therefore, starting with version [1.3.0](https://github.com/bwaidelich/Wwwision.Renderlets.Provider/releases/tag/1.3.0) those markers are now stripped from the renderlet.
+
+Note, that in order for the automatic cache flushing to work as expected, the `@cache` configuration has to be complete:
+
+```neosfusion
+some_renderlet_props = Wwwision.Renderlets.Provider:RenderletProps {
+    @context {
+        someNode = ${q(site).find('#517ad799-35df-4324-9429-5c75629a8b34').get(0)}
+    }
+    properties {
+        someRenderedComponent = Some.Package:Foo {
+            someNode = ${someNode}
+        }
+    }
+    renderer.@cache {
+        entryTags {
+            someNode = ${Neos.Caching.nodeTag(someNode)}
+        }
+    }
+}
+```

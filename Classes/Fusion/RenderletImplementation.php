@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Wwwision\Renderlets\Provider\Fusion;
 
+use Neos\Flow\Annotations as Flow;
+use Neos\Fusion\Core\Cache\ContentCache;
 use Wwwision\Renderlets\Provider\Exception\MissingRenderletParameter;
 use Wwwision\Renderlets\Provider\Exception\UnknownRenderletParameters;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
@@ -11,6 +13,13 @@ use Wwwision\Renderlets\Provider\Model\Renderlet;
 
 final class RenderletImplementation extends AbstractFusionObject
 {
+
+    /**
+     * @Flow\Inject
+     * @var ContentCache
+     */
+    protected $contentCache;
+
     private function cacheId(): CacheId
     {
         return CacheId::fromString($this->fusionValue('cacheId'));
@@ -43,7 +52,7 @@ final class RenderletImplementation extends AbstractFusionObject
         $content = $this->runtime->render($this->path . '/renderer');
         $this->runtime->popContext();
         return Renderlet::fromContentCacheIdAndHttpHeaders(
-            $content,
+            $this->contentCache->processCacheSegments($content, false),
             $this->cacheId(),
             $this->httpHeaders()
         )->toJson();

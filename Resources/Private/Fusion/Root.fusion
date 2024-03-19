@@ -4,6 +4,11 @@ prototype(Wwwision.Renderlets.Provider:ConvertUrisRecursively) {
     node = ${node}
 }
 
+prototype(Wwwision.Renderlets.Provider:ReplaceJsonCacheMarker) {
+  @class = 'Wwwision\\Renderlets\\Provider\\Fusion\\ReplaceJsonCacheMarkerImplementation'
+  value = ${value}
+}
+
 prototype(Wwwision.Renderlets.Provider:Renderlet) {
     @class = 'Wwwision\\Renderlets\\Provider\\Fusion\\RenderletImplementation'
     cacheId = ${String.sha1(Math.random())}
@@ -19,6 +24,7 @@ prototype(Wwwision.Renderlets.Provider:Renderlet) {
         absolute = true
         forceConversion = true
     }
+    #@process.removeCacheMarker = Wwwision.Renderlets.Provider:StripCacheMarker
     @cache {
         mode = 'cached'
         entryIdentifier {
@@ -48,6 +54,7 @@ prototype(Wwwision.Renderlets.Provider:RenderletProps) < prototype(Neos.Fusion:C
             @apply.props = ${properties}
             @process.convertUris = Wwwision.Renderlets.Provider:ConvertUrisRecursively
             @process.toJson = ${Json.stringify(value)}
+            @process.removeCacheMarker = Wwwision.Renderlets.Provider:ReplaceJsonCacheMarker
         }
         @process.convertUris >
     }

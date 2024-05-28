@@ -52,7 +52,7 @@ final class Middleware implements MiddlewareInterface
         } catch (InvalidRenderletId $exception) {
             return new Response(404, [], 'Unknown renderlet id');
         } catch (MissingRenderletParameter | UnknownRenderletParameters $exception) {
-            return new Response(400, [], $exception->getMessage());
+            return new Response(400, [], htmlspecialchars($exception->getMessage(), ENT_QUOTES | ENT_HTML5));
         }
         if ($request->hasHeader('If-None-Match') && $request->getHeaderLine('If-None-Match') === $renderlet->cacheId->toString()) {
             return new Response(304, $renderlet->httpHeaders);
